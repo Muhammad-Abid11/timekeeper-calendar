@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Clock, CalendarCheck, CalendarX } from "lucide-react";
+import { Clock, ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
 
 interface DayCellProps {
   date: Date;
@@ -20,6 +20,20 @@ const DayCell = ({
   timeOut,
   onClick 
 }: DayCellProps) => {
+  const getStatusIcons = () => {
+    if (!hasTimeEntry) {
+      return <Clock className="w-4 h-4 text-gray-400" />;
+    }
+
+    return (
+      <div className="flex items-center gap-1">
+        {timeIn && <ArrowRight className="w-4 h-4 text-blue-500" />}
+        {timeOut && <ArrowLeft className="w-4 h-4 text-yellow-500" />}
+        {timeIn && timeOut && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+      </div>
+    );
+  };
+
   return (
     <Button
       variant="ghost"
@@ -38,14 +52,7 @@ const DayCell = ({
         {format(date, "d")}
       </span>
       
-      {hasTimeEntry ? (
-        <div className="flex items-center gap-1">
-          <CalendarCheck className="w-4 h-4 text-green-500" />
-          <Clock className="w-4 h-4 text-blue-500" />
-        </div>
-      ) : (
-        <CalendarX className="w-4 h-4 text-gray-400" />
-      )}
+      {getStatusIcons()}
     </Button>
   );
 };

@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Clock } from "lucide-react";
+import { ArrowRight, ArrowLeft, Clock, CheckCircle2 } from "lucide-react";
 
 interface TimeEntryDetailsProps {
   isOpen: boolean;
@@ -44,27 +44,33 @@ const TimeEntryDetails = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+          <DialogTitle className="text-xl font-semibold flex items-center gap-2">
             {format(date, "MMMM d, yyyy")}
+            {timeIn && timeOut && (
+              <CheckCircle2 className="w-5 h-5 text-green-500" />
+            )}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="flex items-center justify-between px-4 py-2 bg-slate-50 rounded-lg">
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-blue-500" />
+              <ArrowRight className="w-4 h-4 text-blue-500" />
               <span className="text-sm font-medium">Time In</span>
             </div>
-            <span className="text-sm">{formatTime(timeIn)}</span>
+            <span className="text-sm font-semibold">{formatTime(timeIn)}</span>
           </div>
           <div className="flex items-center justify-between px-4 py-2 bg-slate-50 rounded-lg">
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-blue-500" />
+              <ArrowLeft className="w-4 h-4 text-yellow-500" />
               <span className="text-sm font-medium">Time Out</span>
             </div>
-            <span className="text-sm">{formatTime(timeOut)}</span>
+            <span className="text-sm font-semibold">{formatTime(timeOut)}</span>
           </div>
           <div className="flex items-center justify-between px-4 py-2 bg-blue-50 rounded-lg">
-            <span className="text-sm font-medium">Total Duration</span>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium">Total Duration</span>
+            </div>
             <span className="text-sm font-semibold text-blue-600">
               {calculateDuration()}
             </span>
