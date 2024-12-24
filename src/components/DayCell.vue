@@ -11,10 +11,16 @@
       {{ format(date, 'd') }}
     </span>
     
-    <div class="flex items-center gap-1">
+    <div class="flex flex-col items-center gap-1 text-xs">
       <template v-if="hasTimeEntry">
-        <ArrowRight v-if="timeIn" class="w-4 h-4 text-blue-500" />
-        <ArrowLeft v-if="timeOut" class="w-4 h-4 text-yellow-500" />
+        <div v-if="timeIn" class="flex items-center gap-1">
+          <ArrowRight class="w-4 h-4 text-blue-500" />
+          <span>{{ formatTime(timeIn) }}</span>
+        </div>
+        <div v-if="timeOut" class="flex items-center gap-1">
+          <ArrowLeft class="w-4 h-4 text-yellow-500" />
+          <span>{{ formatTime(timeOut) }}</span>
+        </div>
         <CheckCircle2 v-if="timeIn && timeOut" class="w-4 h-4 text-green-500" />
       </template>
       <Clock v-else class="w-4 h-4 text-gray-400" />
@@ -35,4 +41,9 @@ defineProps<{
 }>();
 
 defineEmits(['click']);
+
+const formatTime = (time?: string) => {
+  if (!time) return '';
+  return format(new Date(`2000-01-01T${time}`), 'HH:mm');
+};
 </script>
