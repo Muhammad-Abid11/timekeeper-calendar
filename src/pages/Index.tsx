@@ -11,6 +11,7 @@ import {
 import CalendarHeader from "@/components/CalendarHeader";
 import DayCell from "@/components/DayCell";
 import TimeEntryForm from "@/components/TimeEntryForm";
+import TimeEntryDetails from "@/components/TimeEntryDetails";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -24,6 +25,7 @@ const Index = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
+  const [showDetails, setShowDetails] = useState(false);
   const { toast } = useToast();
 
   const daysInMonth = eachDayOfInterval({
@@ -35,7 +37,17 @@ const Index = () => {
   const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
 
   const handleDayClick = (date: Date) => {
-    setSelectedDate(date);
+    const entry = timeEntries.find((entry) => 
+      entry.date === format(date, "yyyy-MM-dd")
+    );
+    
+    if (entry) {
+      setSelectedDate(date);
+      setShowDetails(true);
+    } else {
+      setSelectedDate(date);
+      setShowDetails(false);
+    }
   };
 
   const handleSaveTimeEntry = (timeIn: string, timeOut: string) => {
@@ -52,6 +64,12 @@ const Index = () => {
         description: `Time entry for ${format(selectedDate, "MMMM d, yyyy")} has been saved.`,
       });
     }
+  };
+
+  const getTimeEntry = (date: Date) => {
+    return timeEntries.find((entry) => 
+      entry.date === format(date, "yyyy-MM-dd")
+    );
   };
 
   const hasTimeEntry = (date: Date) =>
@@ -74,20 +92,25 @@ const Index = () => {
               {day}
             </div>
           ))}
-          {daysInMonth.map((date) => (
-            <div key={date.toISOString()} className="bg-white aspect-square">
-              <DayCell
-                date={date}
-                isToday={isSameDay(date, new Date())}
-                hasTimeEntry={hasTimeEntry(date)}
-                onClick={() => handleDayClick(date)}
-              />
-            </div>
-          ))}
+          {daysInMonth.map((date) => {
+            const entry = getTimeEntry(date);
+            return (
+              <div key={date.toISOString()} className="bg-white aspect-square">
+                <DayCell
+                  date={date}
+                  isToday={isSameDay(date, new Date())}
+                  hasTimeEntry={hasTimeEntry(date)}
+                  timeIn={entry?.timeIn}
+                  timeOut={entry?.timeOut}
+                  onClick={() => handleDayClick(date)}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <Dialog open={!!selectedDate} onOpenChange={() => setSelectedDate(null)}>
+      <Dialog open={!!selectedDate && !showDetails} onOpenChange={() => setSelectedDate(null)}>
         <DialogContent>
           {selectedDate && (
             <TimeEntryForm
@@ -97,6 +120,16 @@ const Index = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {selectedDate && (
+        <TimeEntryDetails
+          isOpen={showDetails}
+          onClose={() => setShowDetails(false)}
+          date={selectedDate}
+          timeIn={getTimeEntry(selectedDate)?.timeIn}
+          timeOut={getTimeEntry(selectedDate)?.timeOut}
+        />
+      )}
     </div>
   );
 };
