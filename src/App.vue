@@ -31,7 +31,6 @@
       v-if="selectedDate && !showDetails"
       :date="selectedDate"
       :show="!!selectedDate && !showDetails"
-      :existing-entry="getTimeEntry(selectedDate)"
       @close="selectedDate = null"
       @save="handleSaveTimeEntry"
     />
