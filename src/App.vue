@@ -31,12 +31,13 @@
       v-if="selectedDate && !showDetails"
       :date="selectedDate"
       :show="!!selectedDate && !showDetails"
+      :existing-entry="getTimeEntry(selectedDate)"
       @close="selectedDate = null"
       @save="handleSaveTimeEntry"
     />
 
     <TimeEntryDetails
-      v-if="selectedDate && showDetails"
+      v-if="selectedDate"
       :is-open="showDetails"
       :date="selectedDate"
       :time-in="getTimeEntry(selectedDate)?.timeIn"
@@ -49,11 +50,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameDay, format } from 'date-fns';
-import { useToast } from 'vue-toastification';
 import CalendarHeader from './components/CalendarHeader.vue';
 import DayCell from './components/DayCell.vue';
 import TimeEntryForm from './components/TimeEntryForm.vue';
 import TimeEntryDetails from './components/TimeEntryDetails.vue';
+import { useToast } from 'vue-toastification';
 
 interface TimeEntry {
   date: string;
