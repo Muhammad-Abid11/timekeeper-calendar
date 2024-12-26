@@ -19,8 +19,8 @@
             :date="date"
             :is-today="isSameDay(date, new Date())"
             :has-time-entry="hasTimeEntry(date)"
-            :time-in="getTimeEntry(date)?.timeIn"
-            :time-out="getTimeEntry(date)?.timeOut"
+            :time-in="getTimeEntry(date) ? getTimeEntry(date).timeIn : null"
+            :time-out="getTimeEntry(date) ? getTimeEntry(date).timeOut : null"
             @click="handleDayClick(date)"
           />
         </div>
@@ -40,77 +40,82 @@
       v-if="selectedDate"
       :is-open="showDetails"
       :date="selectedDate"
-      :time-in="getTimeEntry(selectedDate)?.timeIn"
-      :time-out="getTimeEntry(selectedDate)?.timeOut"
+      :time-in="getTimeEntry(selectedDate) ? getTimeEntry(selectedDate).timeIn : null"
+      :time-out="getTimeEntry(selectedDate) ? getTimeEntry(selectedDate).timeOut : null"
       @close="showDetails = false"
     />
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed } from 'vue';
+<script>
+import Vue from 'vue';
 import { startOfMonth, endOfMonth, eachDayOfInterval, addMonths, subMonths, isSameDay, format } from 'date-fns';
 import CalendarHeader from './components/CalendarHeader.vue';
 import DayCell from './components/DayCell.vue';
 import TimeEntryForm from './components/TimeEntryForm.vue';
 import TimeEntryDetails from './components/TimeEntryDetails.vue';
-import { useToast } from 'vue-toastification';
 
-interface TimeEntry {
-  date: string;
-  timeIn: string;
-  timeOut: string;
-}
-
-const toast = useToast();
-const currentDate = ref(new Date());
-const selectedDate = ref<Date | null>(null);
-const timeEntries = ref<TimeEntry[]>([]);
-const showDetails = ref(false);
-
-const daysInMonth = computed(() => 
-  eachDayOfInterval({
-    start: startOfMonth(currentDate.value),
-    end: endOfMonth(currentDate.value),
-  })
-);
-
-const handlePrevMonth = () => {
-  currentDate.value = subMonths(currentDate.value, 1);
-};
-
-const handleNextMonth = () => {
-  currentDate.value = addMonths(currentDate.value, 1);
-};
-
-const handleDayClick = (date: Date) => {
-  const entry = timeEntries.value.find(entry => 
-    entry.date === format(date, 'yyyy-MM-dd')
-  );
-  
-  selectedDate.value = date;
-  showDetails.value = !!entry;
-};
-
-const handleSaveTimeEntry = (timeIn: string, timeOut: string) => {
-  if (selectedDate.value) {
-    const newEntry = {
-      date: format(selectedDate.value, 'yyyy-MM-dd'),
-      timeIn,
-      timeOut,
+export default Vue.extend({
+  name: 'App',
+  components: {
+    CalendarHeader,
+    DayCell,
+    TimeEntryForm,
+    TimeEntryDetails
+  },
+  data() {
+    return {
+      currentDate: new Date(),
+      selectedDate: null,
+      timeEntries: [],
+      showDetails: false
     };
-    timeEntries.value.push(newEntry);
-    selectedDate.value = null;
-    toast.success(`Time entry for ${format(selectedDate.value, 'MMMM d, yyyy')} has been saved.`);
+  },
+  computed: {
+    daysInMonth() {
+      return eachDayOfInterval({
+        start: startOfMonth(this.currentDate),
+        end: endOfMonth(this.currentDate),
+      });
+    }
+  },
+  methods: {
+    handlePrevMonth() {
+      this.currentDate = subMonths(this.currentDate, 1);
+    },
+    handleNextMonth() {
+      this.currentDate = addMonths(this.currentDate, 1);
+    },
+    handleDayClick(date) {
+      const entry = this.timeEntries.find(entry => 
+        entry.date === format(date, 'yyyy-MM-dd')
+      );
+      
+      this.selectedDate = date;
+      this.showDetails = !!entry;
+    },
+    handleSaveTimeEntry(timeIn, timeOut) {
+      if (this.selectedDate) {
+        const newEntry = {
+          date: format(this.selectedDate, 'yyyy-MM-dd'),
+          timeIn,
+          timeOut,
+        };
+        this.timeEntries.push(newEntry);
+        this.selectedDate = null;
+        this.$toast.success(`Time entry for ${format(this.selectedDate, 'MMMM d, yyyy')} has been saved.`);
+      }
+    },
+    getTimeEntry(date) {
+      return this.timeEntries.find(entry => 
+        entry.date === format(date, 'yyyy-MM-dd')
+      );
+    },
+    hasTimeEntry(date) {
+      return this.timeEntries.some(entry => 
+        entry.date === format(date, 'yyyy-MM-dd')
+      );
+    }
   }
-};
-
-const getTimeEntry = (date: Date) => {
-  return timeEntries.value.find(entry => 
-    entry.date === format(date, 'yyyy-MM-dd')
-  );
-};
-
-const hasTimeEntry = (date: Date) =>
-  timeEntries.value.some(entry => entry.date === format(date, 'yyyy-MM-dd'));
+});
 </script>
